@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>محرّر المحتوى — أساسيات برمجة الحاسب</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--teal:#0e8a7d;--teal-d:#0a5f57;--ink:#1d2b31;--muted:#5f7178;--line:#e3ecea;--bg:#f6faf9;--card:#fff;
+ --tealbg:#eaf5f2;--amber:#c77d21;--amberbg:#fbf1df;--green:#2e8b57;--greenbg:#e9f6ee;--red:#c0492f;--redbg:#fbeceb;
+ --sans:'Tajawal',system-ui,'Segoe UI',Tahoma,sans-serif;--mono:'JetBrains Mono',ui-monospace,Consolas,monospace;--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.7}
+.top{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.95);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);
+ display:flex;align-items:center;gap:12px;padding:12px 18px;flex-wrap:wrap}
+.top h1{font-size:18px;font-weight:800}
+.top .sp{flex:1}
+.btn{font-family:var(--sans);font-weight:700;border:0;border-radius:10px;cursor:pointer;padding:9px 16px;font-size:14px}
+.btn-p{background:var(--teal);color:#fff}.btn-p:hover{background:var(--teal-d)}
+.btn-g{background:var(--tealbg);color:var(--teal-d)}
+.btn-o{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.btn-d{background:#fdecea;color:var(--red)}
+.status{font-size:13px;color:var(--muted)}
+.tabs{display:flex;gap:6px}
+.tab{padding:8px 16px;border-radius:10px;cursor:pointer;font-weight:700;background:#eef4f2;color:var(--muted)}
+.tab.on{background:var(--teal);color:#fff}
+.wrap{display:grid;grid-template-columns:230px 1fr;gap:16px;padding:16px 18px;align-items:start}
+.side{background:#fbfdfc;border:1px solid var(--line);border-radius:var(--r);padding:10px;position:sticky;top:70px}
+.side h3{font-size:12.5px;color:var(--muted);margin:2px 6px 8px}
+.llist{list-style:none;display:flex;flex-direction:column;gap:3px}
+.llist a{display:flex;gap:9px;align-items:center;padding:8px 10px;border-radius:9px;color:var(--ink);cursor:pointer;font-size:14px;font-weight:500}
+.llist a:hover{background:var(--tealbg)} .llist a.on{background:var(--teal);color:#fff}
+.llist .n{width:24px;height:24px;border-radius:7px;background:var(--tealbg);color:var(--teal-d);font-weight:800;font-size:12px;display:grid;place-items:center}
+.llist a.on .n{background:rgba(255,255,255,.25);color:#fff}
+.main{min-width:0}
+.meta{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:14px}
+.meta label{display:block;font-weight:700;font-size:13px;margin:0 0 4px;color:var(--muted)}
+.meta input{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:9px 11px;font-family:var(--sans);font-size:15px;margin-bottom:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 12px 10px;margin-bottom:12px;position:relative}
+.card .hd{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.chip{font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;background:var(--tealbg);color:var(--teal-d)}
+.chip.note{background:var(--amberbg);color:#8a5a12}.chip.code{background:#0f2b33;color:#8fd9cd}.chip.q{background:#eef3fb;color:#2f6fb0}
+.card .hd .sp{flex:1}
+.icob{width:30px;height:30px;border:1px solid var(--line);background:#fff;border-radius:8px;cursor:pointer;font-size:14px}
+.icob:hover{background:var(--tealbg)}
+.card label{display:block;font-size:12px;color:var(--muted);font-weight:700;margin:6px 0 3px}
+.card input[type=text],.card textarea,.card select{width:100%;border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:14px}
+.card textarea{resize:vertical;min-height:60px}
+.card textarea.code{font-family:var(--mono);direction:ltr;text-align:left;font-size:13px;min-height:90px}
+.row2{display:grid;grid-template-columns:90px 1fr;gap:10px}
+.row-inline{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.addbar{display:flex;gap:8px;align-items:center;margin:6px 0 20px;flex-wrap:wrap}
+.addbar select{border:1.5px solid var(--line);border-radius:9px;padding:8px 10px;font-family:var(--sans)}
+.hint{font-size:12px;color:var(--muted)}
+.help{background:var(--tealbg);border:1px solid #cfe4de;border-radius:10px;padding:10px 12px;font-size:13px;color:var(--teal-d);margin-bottom:14px}
+/* modal preview */
+.modal{position:fixed;inset:0;background:rgba(10,40,36,.5);z-index:50;display:none;padding:20px;overflow:auto}
+.modal.show{display:block}
+.sheet{max-width:820px;margin:0 auto;background:#fff;border-radius:16px;padding:22px}
+.sheet .x{float:left;cursor:pointer;font-weight:800;color:var(--muted)}
+/* preview render styles (mirror site) */
+.pv h3{font-size:20px;color:var(--teal-d);margin:20px 0 8px;border-bottom:2px solid var(--line);padding-bottom:6px}
+.pv p{margin:0 0 10px}
+.pv ul{margin:6px 22px 12px}
+.pv .callout{border-radius:10px;padding:12px 14px;margin:10px 0;border-inline-start:5px solid var(--teal);background:var(--tealbg)}
+.pv .callout .lb{font-weight:800;color:var(--teal-d);margin-bottom:3px}
+.pv .callout.amber{border-color:var(--amber);background:var(--amberbg)}.pv .callout.green{border-color:var(--green);background:var(--greenbg)}.pv .callout.red{border-color:var(--red);background:var(--redbg)}
+.pv .banner{background:linear-gradient(140deg,var(--teal),var(--teal-d));color:#fff;border-radius:12px;padding:16px;text-align:center;margin:12px 0}
+.pv .banner .e{color:#cdeee7;font-style:italic;font-size:14px}
+.pv pre{direction:ltr;text-align:left;background:#0f2b33;color:#e7f3f0;font-family:var(--mono);font-size:13px;padding:12px 14px;border-radius:10px;overflow-x:auto;white-space:pre;margin:10px 0}
+.pv .out{direction:ltr;text-align:left;background:var(--greenbg);border:1px solid #bfe0cd;color:#1f6b41;font-family:var(--mono);font-size:13px;padding:10px 12px;border-radius:8px;margin:10px 0;white-space:pre}
+.pv table{width:100%;border-collapse:collapse;margin:10px 0;font-size:14px;border:1px solid var(--line)}
+.pv th{background:var(--teal);color:#fff;padding:8px}.pv td{border-top:1px solid var(--line);padding:7px}
+.pv bdi.ltr{direction:ltr;unicode-bidi:isolate}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>🛠️ محرّر المحتوى</h1>
+  <div class="tabs"><span class="tab on" data-tab="lessons">الدروس</span><span class="tab" data-tab="quizzes">أوراق العمل</span></div>
+  <div class="sp"></div>
+  <button class="btn btn-o" id="openFiles">فتح ملفات JSON…</button>
+  <button class="btn btn-o" id="openDir">فتح مجلد data (حفظ مباشر)</button>
+  <button class="btn btn-g" id="previewBtn">معاينة الدرس</button>
+  <button class="btn btn-p" id="saveBtn">حفظ / تنزيل</button>
+  <span class="status" id="status">…جارٍ التحميل</span>
+</div>
+
+<div class="wrap">
+  <aside class="side">
+    <h3>المواضيع</h3>
+    <ul class="llist" id="llist"></ul>
+  </aside>
+  <main class="main">
+    <div class="help" id="help">
+      حرّر المحتوى من النماذج أدناه. الحفظ: إن فتحت «مجلد data» يمكنك <b>الحفظ المباشر</b>؛ وإلا استخدم <b>تنزيل</b> واستبدل الملف يدويًّا.
+      لتحميل المحتوى تلقائيًّا شغّل الموقع عبر خادم؛ أو استخدم «فتح ملفات JSON».
+    </div>
+    <div id="editor"></div>
+  </main>
+</div>
+
+<input type="file" id="fileInput" accept=".json,application/json" multiple hidden>
+
+<div class="modal" id="modal"><div class="sheet"><span class="x" id="closeModal">✕ إغلاق</span><div class="pv" id="pv"></div></div></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?"":s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+function bidiEsc(t){t=String(t==null?"":t);
+  const re=/[A-Za-z0-9_$<>=!&|][A-Za-z0-9_$ ().,;:{}\[\]<>=!%&|+\-*/"'’.]*[A-Za-z0-9_$)\]}>=!|"']|[A-Za-z0-9_$]/g;
+  let out="",last=0,m;while((m=re.exec(t))){out+=esc(t.slice(last,m.index));out+=`<bdi class="ltr">${esc(m[0])}</bdi>`;last=m.index+m[0].length;}out+=esc(t.slice(last));return out;}
+
+let LESSONS={}, QUIZ={};        // in-memory data
+let tab="lessons", curId=null;
+let lessonsHandle=null, quizzesHandle=null;   // File System Access handles
+
+/* ---------- load ---------- */
+async function tryFetch(){
+  try{
+    const [a,b]=await Promise.all([fetch("data/lessons.json").then(r=>r.json()), fetch("data/quizzes.json").then(r=>r.json())]);
+    LESSONS=a; QUIZ=b; boot("served"); return true;
+  }catch(e){ return false; }
+}
+function boot(mode){
+  const ids=idList();
+  curId=ids[0]||1;
+  status(mode==="served"?"تم التحميل من data/ (خادم)":mode==="dir"?"تم فتح مجلد data — الحفظ المباشر متاح":"تم فتح الملفات");
+  renderList(); renderEditor();
+}
+function status(t){ $("#status").textContent=t; }
+function idList(){ return [...new Set([...Object.keys(LESSONS),...Object.keys(QUIZ)].map(Number))].sort((a,b)=>a-b); }
+
+$("#openFiles").onclick=()=>$("#fileInput").click();
+$("#fileInput").onchange=async e=>{
+  for(const f of e.target.files){ const txt=await f.text(); let j; try{j=JSON.parse(txt);}catch(err){alert("ملف غير صالح: "+f.name);continue;}
+    if(/quiz/i.test(f.name)||isQuiz(j)) QUIZ=j; else LESSONS=j; }
+  boot("files");
+};
+function isQuiz(j){ const k=Object.keys(j)[0]; return k&&Array.isArray(j[k]); }
+
+$("#openDir").onclick=async()=>{
+  if(!window.showDirectoryPicker){ alert("المتصفّح لا يدعم الحفظ المباشر. استخدم كروم/إيدج، أو استخدم «تنزيل»."); return; }
+  try{
+    const dir=await window.showDirectoryPicker();
+    lessonsHandle=await dir.getFileHandle("lessons.json");
+    quizzesHandle=await dir.getFileHandle("quizzes.json");
+    LESSONS=JSON.parse(await (await lessonsHandle.getFile()).text());
+    QUIZ=JSON.parse(await (await quizzesHandle.getFile()).text());
+    boot("dir");
+  }catch(e){ if(e.name!=="AbortError") alert("تعذّر فتح المجلد: تأكّد أنه يحتوي lessons.json و quizzes.json."); }
+};
+
+/* ---------- save ---------- */
+$("#saveBtn").onclick=async()=>{
+  syncFromDOM();
+  if(lessonsHandle&&quizzesHandle){
+    try{
+      await writeHandle(lessonsHandle,LESSONS); await writeHandle(quizzesHandle,QUIZ);
+      status("✅ حُفِظ مباشرةً في data/ ("+new Date().toLocaleTimeString("ar")+")"); return;
+    }catch(e){ alert("تعذّر الحفظ المباشر، سيتم التنزيل بدلًا منه."); }
+  }
+  download("lessons.json",LESSONS); download("quizzes.json",QUIZ);
+  status("⬇️ نُزِّل الملفان — استبدلهما في مجلد data/");
+};
+async function writeHandle(h,obj){ const w=await h.createWritable(); await w.write(JSON.stringify(obj,null,2)); await w.close(); }
+function download(name,obj){ const b=new Blob([JSON.stringify(obj,null,2)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
+
+/* ---------- tabs & list ---------- */
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{ syncFromDOM(); tab=t.dataset.tab; document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x===t)); renderList(); renderEditor(); });
+function renderList(){
+  const src = tab==="lessons"?LESSONS:QUIZ;
+  const ids=idList();
+  $("#llist").innerHTML=ids.map(id=>{
+    const title=(LESSONS[id]&&LESSONS[id].title)||("الدرس "+id);
+    return `<a data-id="${id}" class="${id==curId?'on':''}"><span class="n">${id}</span><span>${esc(title)}</span></a>`;
+  }).join("");
+  $("#llist").querySelectorAll("a").forEach(a=>a.onclick=()=>{ syncFromDOM(); curId=+a.dataset.id; renderList(); renderEditor(); });
+}
+
+/* ---------- editor ---------- */
+function renderEditor(){
+  if(curId==null){ $("#editor").innerHTML=""; return; }
+  if(tab==="lessons") renderLessonEditor(); else renderQuizEditor();
+}
+
+/* ===== LESSON editor ===== */
+const FIG_NAMES=["jvm-flow","terminal","struct-nest","var-boxes","if-flow","loop-cycle","array-cells"];
+const BLOCK_TYPES=[["h","عنوان"],["fig","رسم توضيحي"],["p","فقرة"],["ul","قائمة"],["note","تنبيه ملوّن"],["banner","شعار"],["pre","كود للعرض"],["code","كود قابل للتشغيل"],["out","صندوق ناتج"],["table","جدول"]];
+function renderLessonEditor(){
+  const L=LESSONS[curId]||(LESSONS[curId]={title:"",subtitle:"",blocks:[]});
+  let html=`<div class="meta">
+    <label>عنوان الدرس</label><input id="f_title" type="text" value="${esc(L.title||"")}">
+    <label>العنوان الفرعي</label><input id="f_sub" type="text" value="${esc(L.subtitle||"")}">
+  </div>`;
+  html+=(L.blocks||[]).map((b,i)=>blockCard(b,i)).join("");
+  html+=`<div class="addbar"><span class="hint">إضافة عنصر:</span><select id="addType">${BLOCK_TYPES.map(t=>`<option value="${t[0]}">${t[1]}</option>`).join("")}</select><button class="btn btn-g" id="addBlock">＋ إضافة</button></div>`;
+  $("#editor").innerHTML=html;
+  $("#addBlock").onclick=()=>{ syncFromDOM(); LESSONS[curId].blocks.push(newBlock($("#addType").value)); renderEditor(); };
+  bindCardControls("blocks");
+}
+function newBlock(t){ return t==="fig"?{t,name:"jvm-flow"}:t==="h"?{t,n:"",txt:""}:t==="p"?{t,txt:""}:t==="ul"?{t,items:[]}:t==="note"?{t,kind:"teal",lb:"",txt:""}:t==="banner"?{t,a:"",e:""}:t==="table"?{t,head:[],rows:[]}:t==="out"?{t,txt:""}:{t,code:""}; }
+function blockCard(b,i){
+  const chip=b.t==="note"?'chip note':(b.t==="code"||b.t==="pre")?'chip code':'chip';
+  const name={h:"عنوان",p:"فقرة",ul:"قائمة",note:"تنبيه",banner:"شعار",pre:"كود للعرض",code:"كود قابل للتشغيل",out:"ناتج",table:"جدول",fig:"رسم"}[b.t]||b.t;
+  let body="";
+  if(b.t==="fig") body=`<label>نوع الرسم</label><select data-f="name">${FIG_NAMES.map(f=>`<option value="${f}" ${b.name===f?"selected":""}>${f}</option>`).join("")}</select><div class="hint">تُعرض الرسوم تلقائيًّا في الموقع.</div>`;
+  else if(b.t==="h") body=`<div class="row2"><div><label>الرقم</label><input data-f="n" type="text" value="${esc(b.n||"")}"></div><div><label>النص</label><input data-f="txt" type="text" value="${esc(b.txt||"")}"></div></div>`;
+  else if(b.t==="p") body=`<label>النص</label><textarea data-f="txt">${esc(b.txt||"")}</textarea><label class="row-inline"><input type="checkbox" data-f="b" ${b.b?"checked":""}> عريض</label>`;
+  else if(b.t==="ul") body=`<label>عناصر القائمة (سطر لكل عنصر)</label><textarea data-f="items">${esc((b.items||[]).join("\n"))}</textarea>`;
+  else if(b.t==="note") body=`<div class="row2"><div><label>اللون</label><select data-f="kind"><option value="teal" ${b.kind==="teal"?"selected":""}>أخضر</option><option value="amber" ${b.kind==="amber"?"selected":""}>كهرماني</option><option value="green" ${b.kind==="green"?"selected":""}>ناجح</option><option value="red" ${b.kind==="red"?"selected":""}>خطأ</option></select></div><div><label>العنوان</label><input data-f="lb" type="text" value="${esc(b.lb||"")}"></div></div><label>النص</label><textarea data-f="txt">${esc(b.txt||"")}</textarea>`;
+  else if(b.t==="banner") body=`<label>العبارة (عربي)</label><input data-f="a" type="text" value="${esc(b.a||"")}"><label>الترجمة (إنجليزي)</label><input data-f="e" type="text" value="${esc(b.e||"")}">`;
+  else if(b.t==="pre"||b.t==="code") body=`<label>الكود</label><textarea data-f="code" class="code">${esc(b.code||"")}</textarea>`;
+  else if(b.t==="out") body=`<label>الناتج</label><textarea data-f="txt" class="code">${esc(b.txt||"")}</textarea>`;
+  else if(b.t==="table") body=`<label>رؤوس الأعمدة (افصل بـ | )</label><input data-f="head" type="text" value="${esc((b.head||[]).join(" | "))}"><label>الصفوف (سطر لكل صف، والخلايا بـ | )</label><textarea data-f="rows" class="code">${esc((b.rows||[]).map(r=>r.join(" | ")).join("\n"))}</textarea>`;
+  return `<div class="card" data-i="${i}" data-type="${b.t}"><div class="hd"><span class="${chip}">${name}</span><span class="sp"></span>
+    <button class="icob" data-act="up" title="أعلى">▲</button><button class="icob" data-act="down" title="أسفل">▼</button><button class="icob" data-act="del" title="حذف">🗑</button></div>${body}</div>`;
+}
+
+/* ===== QUIZ editor ===== */
+const Q_TYPES=[["sec","عنوان قسم"],["mcq","اختيار متعدّد"],["tf","صح/خطأ"],["fill","أكمل الفراغ"],["match","توصيل"],["choose","اختيار (عملي)"],["trace","تتبّع ناتج"],["self","تحقّق ذاتي"]];
+function renderQuizEditor(){
+  const Q=QUIZ[curId]||(QUIZ[curId]=[]);
+  let html=Q.map((it,i)=>quizCard(it,i)).join("");
+  html+=`<div class="addbar"><span class="hint">إضافة سؤال:</span><select id="addQType">${Q_TYPES.map(t=>`<option value="${t[0]}">${t[1]}</option>`).join("")}</select><button class="btn btn-g" id="addQ">＋ إضافة</button></div>`;
+  $("#editor").innerHTML=html;
+  $("#addQ").onclick=()=>{ syncFromDOM(); QUIZ[curId].push(newQuiz($("#addQType").value)); renderEditor(); };
+  bindCardControls("quiz");
+}
+function newQuiz(k){ return k==="sec"?{k,t:""}:k==="mcq"?{k,q:"",code:false,opts:["",""],ans:0}:k==="tf"?{k,q:"",ans:true}:k==="fill"?{k,q:"",ans:[""]}:k==="match"?{k,left:[{t:""}],right:[""],ans:[0]}:k==="choose"?{k,q:"",opts:["",""],ans:0}:k==="trace"?{k,q:"",code:"",out:""}:{k,q:"",model:"",code:""}; }
+function quizCard(it,i){
+  const name={sec:"قسم",mcq:"اختيار",tf:"صح/خطأ",fill:"فراغ",match:"توصيل",choose:"اختيار عملي",trace:"تتبّع",self:"تحقّق ذاتي"}[it.k]||it.k;
+  let body="";
+  if(it.k==="sec") body=`<label>عنوان القسم</label><input data-f="t" type="text" value="${esc(it.t||"")}">`;
+  else if(it.k==="mcq"||it.k==="choose"){
+    body=`<label>السؤال</label><input data-f="q" type="text" value="${esc(it.q||"")}">`
+      + (it.k==="mcq"?`<label class="row-inline"><input type="checkbox" data-f="code" ${it.code?"checked":""}> الخيارات كود (LTR)</label>`:"")
+      + `<label>الخيارات (سطر لكل خيار)</label><textarea data-f="opts">${esc((it.opts||[]).join("\n"))}</textarea>`
+      + `<label>رقم الإجابة الصحيحة (يبدأ من 0)</label><input data-f="ans" type="number" min="0" value="${it.ans||0}">`;
+  }
+  else if(it.k==="tf") body=`<label>العبارة</label><input data-f="q" type="text" value="${esc(it.q||"")}"><label>الإجابة</label><select data-f="ans"><option value="true" ${it.ans?"selected":""}>صح</option><option value="false" ${!it.ans?"selected":""}>خطأ</option></select>`;
+  else if(it.k==="fill") body=`<label>السؤال (ضع ......... مكان الفراغ)</label><input data-f="q" type="text" value="${esc(it.q||"")}"><label>الإجابات المقبولة (سطر لكل بديل)</label><textarea data-f="ans">${esc((it.ans||[]).join("\n"))}</textarea>`;
+  else if(it.k==="match") body=`<label>العمود (أ) — سطر لكل عنصر، اكتب <b>code:</b> قبل الكود</label><textarea data-f="left">${esc((it.left||[]).map(x=>x.c!==undefined?("code:"+x.c):(x.t||"")).join("\n"))}</textarea>`
+      + `<label>العمود (ب) — سطر لكل عنصر (ابدأ بالحرف: أ. ب. …)</label><textarea data-f="right">${esc((it.right||[]).join("\n"))}</textarea>`
+      + `<label>مفتاح التوصيل (أرقام العمود ب لكل صف، مفصولة بفواصل)</label><input data-f="ans" type="text" value="${esc((it.ans||[]).join(","))}">`;
+  else if(it.k==="trace") body=`<label>نصّ السؤال</label><input data-f="q" type="text" value="${esc(it.q||"")}"><label>الكود</label><textarea data-f="code" class="code">${esc(it.code||"")}</textarea><label>الناتج المتوقّع</label><textarea data-f="out" class="code">${esc(it.out||"")}</textarea>`;
+  else if(it.k==="self") body=`<label>نصّ السؤال</label><input data-f="q" type="text" value="${esc(it.q||"")}"><label>الكود (اختياري)</label><textarea data-f="code" class="code">${esc(it.code||"")}</textarea><label>الإجابة النموذجية</label><textarea data-f="model">${esc(it.model||"")}</textarea>`;
+  return `<div class="card" data-i="${i}" data-type="${it.k}"><div class="hd"><span class="chip q">${name}</span><span class="sp"></span>
+    <button class="icob" data-act="up">▲</button><button class="icob" data-act="down">▼</button><button class="icob" data-act="del">🗑</button></div>${body}</div>`;
+}
+
+function bindCardControls(kind){
+  $("#editor").querySelectorAll(".card").forEach(card=>{
+    card.querySelectorAll("[data-act]").forEach(btn=>btn.onclick=()=>{
+      syncFromDOM(); const i=+card.dataset.i; const arr=(kind==="blocks")?LESSONS[curId].blocks:QUIZ[curId]; const act=btn.dataset.act;
+      if(act==="del"){ if(confirm("حذف هذا العنصر؟")) arr.splice(i,1); }
+      else if(act==="up"&&i>0){ [arr[i-1],arr[i]]=[arr[i],arr[i-1]]; }
+      else if(act==="down"&&i<arr.length-1){ [arr[i+1],arr[i]]=[arr[i],arr[i+1]]; }
+      renderEditor();
+    });
+  });
+}
+
+/* ---------- DOM -> data ---------- */
+function syncFromDOM(){
+  if(curId==null) return;
+  if(tab==="lessons"){
+    const L=LESSONS[curId]; if(!L) return;
+    if($("#f_title")) L.title=$("#f_title").value;
+    if($("#f_sub")) L.subtitle=$("#f_sub").value;
+    const cards=$("#editor")?$("#editor").querySelectorAll(".card"):[];
+    const blocks=[];
+    cards.forEach(card=>{ const t=card.dataset.type; const g=f=>{const el=card.querySelector(`[data-f="${f}"]`);return el;};
+      const val=f=>{const el=g(f);return el?el.value:"";};
+      let b={t};
+      if(t==="fig"){ b.name=val("name"); }
+      else if(t==="h"){ b.n=val("n"); b.txt=val("txt"); }
+      else if(t==="p"){ b.txt=val("txt"); if(g("b")&&g("b").checked) b.b=true; }
+      else if(t==="ul"){ b.items=val("items").split("\n").map(s=>s.trim()).filter(Boolean); }
+      else if(t==="note"){ b.kind=val("kind"); b.lb=val("lb"); b.txt=val("txt"); }
+      else if(t==="banner"){ b.a=val("a"); b.e=val("e"); }
+      else if(t==="pre"||t==="code"){ b.code=val("code"); }
+      else if(t==="out"){ b.txt=val("txt"); }
+      else if(t==="table"){ b.head=splitCells(val("head")); b.rows=val("rows").split("\n").filter(r=>r.trim()!=="").map(r=>splitCells(r)); }
+      blocks.push(b);
+    });
+    L.blocks=blocks;
+  } else {
+    const arr=QUIZ[curId]; if(!arr) return;
+    const cards=$("#editor")?$("#editor").querySelectorAll(".card"):[];
+    const out=[];
+    cards.forEach(card=>{ const k=card.dataset.type; const val=f=>{const el=card.querySelector(`[data-f="${f}"]`);return el?el.value:"";};
+      const chk=f=>{const el=card.querySelector(`[data-f="${f}"]`);return el?el.checked:false;};
+      let it={k};
+      if(k==="sec"){ it.t=val("t"); }
+      else if(k==="mcq"||k==="choose"){ it.q=val("q"); if(k==="mcq") it.code=chk("code"); it.opts=val("opts").split("\n").map(s=>s.replace(/\s+$/,"")).filter(s=>s!==""); it.ans=+val("ans")||0; }
+      else if(k==="tf"){ it.q=val("q"); it.ans=(val("ans")==="true"); }
+      else if(k==="fill"){ it.q=val("q"); it.ans=val("ans").split("\n").map(s=>s.trim()).filter(Boolean); }
+      else if(k==="match"){ it.left=val("left").split("\n").filter(s=>s.trim()!=="").map(s=>s.startsWith("code:")?{c:s.slice(5).trim()}:{t:s.trim()}); it.right=val("right").split("\n").map(s=>s.trim()).filter(Boolean); it.ans=val("ans").split(/[,،\s]+/).filter(s=>s!=="").map(Number); }
+      else if(k==="trace"){ it.q=val("q"); it.code=val("code"); it.out=val("out"); }
+      else if(k==="self"){ it.q=val("q"); it.code=val("code"); it.model=val("model"); }
+      out.push(it);
+    });
+    QUIZ[curId]=out;
+  }
+}
+function splitCells(s){ return s.split("|").map(x=>x.trim()); }
+
+/* ---------- preview ---------- */
+function blockHTML(b){
+  switch(b.t){
+    case"h": return `<h3>${b.n?`<span style="color:var(--teal)">${esc(b.n)}) </span>`:""}${bidiEsc(b.txt)}</h3>`;
+    case"p": return `<p${b.b?' style="font-weight:700"':''}>${bidiEsc(b.txt)}</p>`;
+    case"ul": return `<ul>${(b.items||[]).map(i=>`<li>${bidiEsc(i)}</li>`).join("")}</ul>`;
+    case"note": return `<div class="callout ${b.kind||'teal'}"><div class="lb">${esc(b.lb)}</div><div>${bidiEsc(b.txt)}</div></div>`;
+    case"banner": return `<div class="banner"><div style="font-size:20px;font-weight:800">${esc(b.a)}</div><div class="e">${esc(b.e)}</div></div>`;
+    case"pre": case"code": return `<pre>${esc(b.code)}</pre>`;
+    case"out": return `<div class="out">${esc(b.txt)}</div>`;
+    case"fig": return `<div style="border:1px dashed var(--teal);background:var(--tealbg);color:var(--teal-d);border-radius:10px;padding:12px;text-align:center;margin:10px 0">🖼️ رسم توضيحي: ${esc(b.name||"")}</div>`;
+    case"table": { const h=(b.head||[]).map(x=>`<th>${bidiEsc(x)}</th>`).join(""); const r=(b.rows||[]).map(row=>`<tr>${row.map(c=>`<td>${bidiEsc(c)}</td>`).join("")}</tr>`).join(""); return `<table>${h?`<thead><tr>${h}</tr></thead>`:""}<tbody>${r}</tbody></table>`; }
+    default: return "";
+  }
+}
+$("#previewBtn").onclick=()=>{ syncFromDOM(); const L=LESSONS[curId]||{blocks:[]};
+  $("#pv").innerHTML=`<div style="text-align:center;margin-bottom:10px"><div style="color:var(--teal);font-weight:700">الموضوع ${curId}</div><h2 style="font-size:24px">${esc(L.title||"")}</h2><div style="color:var(--muted)">${esc(L.subtitle||"")}</div></div>`+(L.blocks||[]).map(blockHTML).join("");
+  $("#modal").classList.add("show");
+};
+$("#closeModal").onclick=()=>$("#modal").classList.remove("show");
+$("#modal").onclick=e=>{ if(e.target===$("#modal")) $("#modal").classList.remove("show"); };
+
+/* ---------- init ---------- */
+(async()=>{ const ok=await tryFetch(); if(!ok){ status("لم يُحمّل تلقائيًّا — استخدم «فتح ملفات JSON» أو «فتح مجلد data»، أو شغّل عبر خادم."); } })();
+</script>
+</body>
+</html>
